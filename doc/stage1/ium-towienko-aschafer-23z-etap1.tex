@@ -66,29 +66,23 @@ Temat projektu przekazany przez Klienta:
 
 \section{Problem biznesowy}
 
-\textbf{TODO} coś o samej Pozytywce	w ramach kontekstu
+Klientem jest właściciel portalu "Pozytywka", będącego serwisem muzycznym, pozwalającym użytkownikom na odtwarzanie utworów online.
 
-Celem projektu jest realizacja funkcjonalności pozwalającej użytkownikom serwisu Pozytywka na generowanie playlist, których z których utwory podobać się będą wybranej grupie użytkowników. Taka funkcjonalność mogłaby być wykorzystywana do automatycznego układania playlist na imprezy w taki sposób, aby ich zawartość trafiała w gust jak największej części odbiorców. Implementacja takiej funkcjonalności ma zwiększyć zadowolenie użytkowników z jakości playlist odtwarzanych na imprezach, tym samym zwiększając ich zadowolenie z użytkowania portalu.
+Celem projektu jest realizacja funkcjonalności pozwalającej użytkownikom serwisu Pozytywka na generowanie playlist, z których utwory podobać się będą wybranej grupie użytkowników. Taka funkcjonalność mogłaby być wykorzystywana do automatycznego układania playlist na imprezy w taki sposób, aby ich zawartość trafiała w gust jak największej części odbiorców. Implementacja takiej funkcjonalności ma zwiększyć zadowolenie użytkowników z jakości playlist odtwarzanych na imprezach, tym samym zwiększając ich zadowolenie z użytkowania portalu.
 
 \subsection*{Biznesowe kryterium sukcesu}
-\textbf{TODO możliwości - wybrać jakiś konkret:}
 \begin{itemize}
-\item Dla $k\%$ użytkowników, playlista odtwarzana przez co najmniej $X\%$ jej czasu trwania w ciągu jednej z najbliższych $N$ sesji użytkownika 
-\item Dla $k\%$ użytkowników, podczas odtwarzania playlisty przez co najmniej $X\%$ jej czasu trwania pomijane jest co najwyżej $Y\%$ utworów
-\item Coś jeszcze?
+\item Dla $k\%$ użytkowników, playlista odtwarzana przez co najmniej $X\%$ jej czasu trwania w ciągu jednej z najbliższych $N$ sesji jednego z użytkowników, który brał udział w tworzeniu playlisty 
 \end{itemize}
 
 
 
 \subsection{Założenia}
 \begin{itemize}
-	\item Playlisty generowane będą na podstawie profili oraz historii sesji nie więcej niż $N$ użytkowników 
-	
-	\textbf{TODO ile to N}
-	
+	\item Playlisty generowane będą na podstawie profili oraz historii sesji nie więcej niż $10$ użytkowników 	
 	\item Playlisty w większości przypadków użycia nie będą wykorzystywane wielokrotnie
 	\item Dobór kolejności utworów na playliście nie jest przedmiotem zadania
-	\item Dostęp do playlisty mają wszyscy użytkownicy, których profile i historia sesji były uwzględnione przy jej generowaniu / tylko użytkownik, który utworzył playlistę
+	\item Dostęp do playlisty mają wszyscy użytkownicy, których profile i historia sesji były uwzględnione przy jej generowaniu
 \end{itemize}
 
 \subsection{Pożądane cechy rozwiązania}
@@ -97,8 +91,6 @@ Celem projektu jest realizacja funkcjonalności pozwalającej użytkownikom serw
 \item Playlista może być wygenerowana w bardzo krótkim czasie
 
 \item Funkcjonalność zachowuje się poprawnie dla nowo dodanych użytkowników oraz utworów
-
-\textbf{TODO cold start - czy istotny?}
 
 \item W ocenianiu gustu muzycznego poszczególnych użytkowników większe znaczenie powinny mieć niedawno odtwarzane utwory
 
@@ -114,19 +106,28 @@ Podejście \textit{collaborative filtering} pozwala na generowanie rekomendacji 
 \item Wygenerowanie bardzo dużej liczby rekomendacji dla każdego z użytkowników wraz z oceną podobieństwa poszczególnych utworów do gustu muzycznego użytkownika (liczba rekomendacji proporcjonalna do liczby użytkowników)
 \item Znormalizowanie ocen podobieństwa do zakresu $<0, 1>$
 \item Wyznacznie zbioru utworów, które pojawiły się w rekomendacjach wszystkich użytkowników
-\item Wybranie tych utworów, dla których iloczyn ich ocen dla wszystkich użytkowników jest największy
+\item Wybór tych utworów, dla których iloczyn ich ocen dla wszystkich użytkowników jest największy
 
 \end{enumerate}
 
-Istotnym problemem w rozważanym zadaniu jest tzw. \textit{cold-start}, czyli zachowanie modelu dla użytkowników bądź utworów, na których model nie był trenowany. Tradycyjne podejścia rozkładu macierzy interakcji takie jak \textit{Funk MF} czy \textit{SVD++} nie przewidują występowania takich sytuacji i spisują się słabo w scenariuszach \textit{cold-start}. W rozwiązaniu zostanie wykorzystany model \href{https://arxiv.org/pdf/1507.08439.pdf}{LightFM}, który rozwiązuje problem \textit{cold-start} przez zastosowanie metadanych (atrybutów) do opisywania zarówno użytkowników, jak i utworów. Przykładowo, nowy użytkownik dodany do systemu nie posiada historii sesji, ale jest znany jego wiek, płeć, czy chociażby zadeklarowane preferencje, co do gatunków muzycznych - dane te można wykorzystać do wyszukiwania podobieństw względem innych użytkowników.
+Istotnym problemem w rozważanym zadaniu jest tzw. \textit{cold-start}, czyli zachowanie modelu dla użytkowników bądź utworów, na których model nie był trenowany. Tradycyjne podejścia rozkładu macierzy interakcji takie jak \textit{Funk MF} czy \textit{SVD++} nie przewidują występowania takich sytuacji i spisują się słabo w scenariuszach \textit{cold-start}. W rozwiązaniu zostanie wykorzystany model \href{https://arxiv.org/pdf/1507.08439.pdf}{LightFM}, który rozwiązuje problem \textit{cold-start} przez zastosowanie metadanych (atrybutów) do opisywania zarówno użytkowników, jak i utworów. Przykładowo, nowy utwór dodany do systemu nie był brany pod uwagę przy trenowaniu modelu, ale posiada on atrybuty takie jak \texttt{instrumentalness}, \texttt{tempo}, \texttt{danceability} (zgodne z taksonomią Spotify), oraz wiele innych, co można wykorzystać do wyszukiwania podobieństw. 
+
+\subsection*{Analityczne kryterium sukcesu}
+
+Wyznaczanie rekomendacji dla pojedynczego użytkownika - pole pod krzywą ROC powyżej $X$ przy szacowaniu oceny dla utworów ze zbioru testowego (kryterium bezpośrednio związane z modelem)
+
+Wyznaczanie rekomendacji dla wielu użytkowników - co najmniej $f(n)$ rekomendacji wyznaczonych z pewnością $Y$.
 
 \section{Analiza dostarczonych danych}
 
-\textbf{TODO kolejne iteracja zbierania danych od Klienta, dodatkowe wymagania od zadania (liczba użytkowników, więcej historii sesji)}
 
-\textbf{TODO - czy mamy opisywać cały feature engineering?}
+Z perspektywy rozwiązania problemu za pomocą podejścia \textit{collaborative filtering} kwestią kluczową jest pozyskanie dużej ilości informacji na temat użytkowników i historii sesji - zbyt mała ilość nie pozwoli na precyzyjne wyszukiwanie podobieństw pomiędzy użytkownikami. W trzeciej wersji otrzymanych danych uzyskano dane na temat $1100$ użytkowników oraz blisko $102.000$ sesji, co wstępnie uznano za ilość wystarczającą.
 
-Z perspektywy wytestowania podejścia opartego na \textit{jawnym feedbacku} należy rozważyć sposób zamodelowania takiej informacji - nie jest ona dana bezpośrednio w zbiorze danych. Jednym z możliwych podejść może być wyznaczenie domniemanej oceny wystawionej przez użytkownika danemu utworowi na podstawie:
+
+
+Model LightFM pozwala na wykorzystanie metadanych do opisu utworów i użytkowników, aby rozwiązać problem \textit{cold-start}. W przypadku użytkowników, wykorzystać można informację o zadeklarowanych przez nich preferencjach co do gatunków muzycznych. Należy mieć na uwadze, że sama deklaracja może nie być wystarczająca do znalezienia podobnych użytkowników - np w sytuacji, kiedy dana osoba zadeklaruje wyjątkowo nietypową kombinację gatunków. W takiej sytuacji \textbf{TODO}
+
+Z perspektywy wytestowania podejścia opartego na \textit{jawnym feedbacku} należy rozważyć sposób zamodelowania takiej informacji - nie jest ona dana bezpośrednio w zbiorze danych. Można ją jednak oszacować wyznaczyć przez analizę historii sesji użytkownika - jednym z możliwych podejść może być wyznaczenie domniemanej oceny wystawionej przez użytkownika danemu utworowi na podstawie:
 
 \begin{itemize}
 
@@ -135,7 +136,35 @@ Z perspektywy wytestowania podejścia opartego na \textit{jawnym feedbacku} nale
 \item Częstotliwości występowania zdarzenia \texttt{skip}
 
 \end{itemize}
-	
-	
+
+\subsection{Pierwsza iteracja zbierania danych}
+Zostały odkryte liczne braki lub błędy w danych:
+\begin{itemize}
+\item \texttt{id=-1} oraz \texttt{genres=null} w pliku \texttt{artists.jsonl},
+\item \texttt{id=null} w pliku \texttt{tracks.jsonl},
+\item \texttt{id=null} w pliku \texttt{sessions.jsonl},
+\item \texttt{user\_id=null}, \texttt{event\_type=null}, oraz \texttt{track\_id=null} dla \texttt{event\_type!=advertisement} w pliku\\ \texttt{sessions.jsonl},
+\item sekwencje wierszy, gdzie \texttt{session\_id} oraz \texttt{timestamp} mają tę samą wartość w pliku \texttt{sessions.jsonl},
+\item \texttt{favourite\_genres=null} w pliku \texttt{users.jsonl}.
+
+\end{itemize}
+
+Przy okazji prośby o nowe dane, uzgodniono znaczenie atrybutów i ich wartości w pliku \texttt{tracks.jsonl} oraz przyczynę obecności małej liczby wierszy z wartością \texttt{storage\_class=fast} w pliku \texttt{track\_storage.jsonl}.
+
+\subsection{Druga iteracja zbierania danych}
+\begin{itemize}
+\item Otrzymano szczegółowe informacje, dotyczące znaczenia atrybutów utworów z pliku \texttt{tracks.jsonl},
+\item Klienty wyeliminował braki oraz błędy wymienione w poprzedniej iteracji danych,
+\item Został dostrzeżony fakt, że w pliku \texttt{tracks.jsonl} niektóre utwory występują kilkukrotnie, a owe wystąpienia różnią się jedynie wartościami \texttt{id} i \texttt{popularity} - zwrócono na to uwagę Klientowi.
+
+\end{itemize}
+
+Na tym etapie podjęto decyzję o skorzystaniu z podejścia collaborative filtering do rozwiązania problemu. Niezbędne było uzyskanie od Klienta większej ilości danych na temat użytkowników oraz ich historii sesji.
+
+\subsection{Trzecia iteracja zbierania danych}
+\begin{itemize}
+\item Wyjaśniono wielokrotne wystąpienia tego samego utworu w pliku \texttt{tracks.jsonl} - kilkukrotne wystąpienie tego samego utworu pod innym \texttt{id} i \texttt{popularity} nie jest błędem, a wynika z kilkukrotnego pojawienia się utworu na runku w różnych wydaniach,
+\item Uzyskano większą ilość danych na temat użytkowników oraz ich historii sesji - wstępnie uznano ją za wystarczającą
+\end{itemize}
 
 \end{document}
