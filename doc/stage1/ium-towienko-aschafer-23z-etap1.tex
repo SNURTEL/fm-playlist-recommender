@@ -72,27 +72,28 @@ Celem projektu jest realizacja funkcjonalności pozwalającej użytkownikom serw
 
 \subsection*{Biznesowe kryterium sukcesu}
 \begin{itemize}
-\item Dla $k\%$ użytkowników, playlista odtwarzana przez co najmniej $X\%$ jej czasu trwania w ciągu jednej z najbliższych $N$ sesji jednego z użytkowników, który brał udział w tworzeniu playlisty 
+\item W co najmniej $1/4$ uruchomień, playlista zostanie odtworzona przez minimum $35\%$ jej czasu trwania w ciągu jednej z najbliższych $20$ sesji jednego z użytkowników, który brał udział w tworzeniu playlisty.
 \end{itemize}
 
 
 
 \subsection{Założenia}
 \begin{itemize}
-	\item Playlisty generowane będą na podstawie profili oraz historii sesji nie więcej niż $10$ użytkowników 	
-	\item Playlisty w większości przypadków użycia nie będą wykorzystywane wielokrotnie
-	\item Dobór kolejności utworów na playliście nie jest przedmiotem zadania
-	\item Dostęp do playlisty mają wszyscy użytkownicy, których profile i historia sesji były uwzględnione przy jej generowaniu
+	\item Playlisty generowane będą na podstawie profili oraz historii sesji nie więcej niż $10$ użytkowników jednocześnie,
+	\item playlisty w większości przypadków użycia nie będą wykorzystywane wielokrotnie,
+	\item dobór kolejności utworów na playliście nie jest przedmiotem zadania,
+	\item dostęp do playlisty mają wszyscy użytkownicy, których profile i historia sesji były uwzględnione przy jej generowaniu,
+	\item generowane playlisty składają się z 20 utworów każda.
 \end{itemize}
 
 \subsection{Pożądane cechy rozwiązania}
 \begin{itemize}
 
-\item Playlista może być wygenerowana w bardzo krótkim czasie
+\item Playlista może być wygenerowana w bardzo krótkim czasie,
 
-\item Funkcjonalność zachowuje się poprawnie dla nowo dodanych użytkowników oraz utworów
+\item funkcjonalność zachowuje się poprawnie dla nowo dodanych użytkowników oraz utworów,
 
-\item W ocenianiu gustu muzycznego poszczególnych użytkowników większe znaczenie powinny mieć niedawno odtwarzane utwory
+\item w ocenianiu gustu muzycznego poszczególnych użytkowników większe znaczenie powinny mieć niedawno odtwarzane utwory.
 
 \end{itemize}
 
@@ -103,10 +104,10 @@ Projekt zakłada zamodelowanie problemu jako zadanie generowania rekomendacji. P
 Podejście \textit{collaborative filtering} pozwala na generowanie rekomendacji dla pojedynczego użytkownika. Aby dostosować je do problemu, generowanie rekomendacji dla wielu użytkowników jednocześnie zamodelowane będzie jako:
 \begin{enumerate}
 
-\item Wygenerowanie bardzo dużej liczby rekomendacji dla każdego z użytkowników wraz z oceną podobieństwa poszczególnych utworów do gustu muzycznego użytkownika (liczba rekomendacji proporcjonalna do liczby użytkowników)
-\item Znormalizowanie ocen podobieństwa do zakresu $<0, 1>$
-\item Wyznacznie zbioru utworów, które pojawiły się w rekomendacjach wszystkich użytkowników
-\item Wybór tych utworów, dla których iloczyn ich ocen dla wszystkich użytkowników jest największy
+\item wygenerowanie bardzo dużej liczby rekomendacji dla każdego z użytkowników wraz z oceną podobieństwa poszczególnych utworów do gustu muzycznego użytkownika (liczba rekomendacji proporcjonalna do liczby użytkowników),
+\item znormalizowanie ocen podobieństwa do zakresu $<0, 1>$,
+\item wyznacznie zbioru utworów, które pojawiły się w rekomendacjach wszystkich użytkowników,
+\item wybór tych utworów, dla których iloczyn ich ocen dla wszystkich użytkowników jest największy.
 
 \end{enumerate}
 
@@ -114,9 +115,9 @@ Istotnym problemem w rozważanym zadaniu jest tzw. \textit{cold-start}, czyli za
 
 \subsection*{Analityczne kryterium sukcesu}
 
-Wyznaczanie rekomendacji dla pojedynczego użytkownika - pole pod krzywą ROC powyżej $X$ przy szacowaniu oceny dla utworów ze zbioru testowego (kryterium bezpośrednio związane z modelem)
+Wyznaczanie rekomendacji dla pojedynczego użytkownika - pole pod krzywą ROC powyżej $0,6$ przy szacowaniu oceny dla utworów ze zbioru testowego (kryterium bezpośrednio związane z modelem)
 
-Wyznaczanie rekomendacji dla wielu użytkowników - co najmniej $f(n)$ rekomendacji wyznaczonych z pewnością $Y$.
+Wyznaczanie rekomendacji dla wielu ($n$) użytkowników - co najmniej $50\%$ rekomendacji uwzględnionych w playliście wyznaczonych z pewnością $0.5^n$ przy w pełni losowym wyborze użytkowników.
 
 \section{Analiza dostarczonych danych}
 
@@ -124,16 +125,15 @@ Wyznaczanie rekomendacji dla wielu użytkowników - co najmniej $f(n)$ rekomenda
 Z perspektywy rozwiązania problemu za pomocą podejścia \textit{collaborative filtering} kwestią kluczową jest pozyskanie dużej ilości informacji na temat użytkowników i historii sesji - zbyt mała ilość nie pozwoli na precyzyjne wyszukiwanie podobieństw pomiędzy użytkownikami. W trzeciej wersji otrzymanych danych uzyskano dane na temat $1100$ użytkowników oraz blisko $102.000$ sesji, co wstępnie uznano za ilość wystarczającą.
 
 
-
-Model LightFM pozwala na wykorzystanie metadanych do opisu utworów i użytkowników, aby rozwiązać problem \textit{cold-start}. W przypadku użytkowników, wykorzystać można informację o zadeklarowanych przez nich preferencjach co do gatunków muzycznych. Należy mieć na uwadze, że sama deklaracja może nie być wystarczająca do znalezienia podobnych użytkowników - np w sytuacji, kiedy dana osoba zadeklaruje wyjątkowo nietypową kombinację gatunków. W takiej sytuacji \textbf{TODO}
+Model LightFM pozwala na wykorzystanie metadanych do opisu utworów i użytkowników, aby rozwiązać problem \textit{cold-start}. W przypadku użytkowników, wykorzystać można informację o zadeklarowanych przez nich preferencjach co do gatunków muzycznych. Należy mieć na uwadze, że sama deklaracja może nie być wystarczająca do znalezienia podobnych użytkowników - np w sytuacji, kiedy dana osoba posiada bardzo ubogą historię sesji, a ponadto zadeklaruje wyjątkowo nietypową kombinację preferowanych gatunków. W tym wypadku za preferencje muzyczne takiej osoby przyjęte zostaną utwory, które w ogólności charakteryzują się dużą popularnością, a ich waga przy wyznaczaniu końcowych rekomendacji zostanie ograniczona. 
 
 Z perspektywy wytestowania podejścia opartego na \textit{jawnym feedbacku} należy rozważyć sposób zamodelowania takiej informacji - nie jest ona dana bezpośrednio w zbiorze danych. Można ją jednak oszacować wyznaczyć przez analizę historii sesji użytkownika - jednym z możliwych podejść może być wyznaczenie domniemanej oceny wystawionej przez użytkownika danemu utworowi na podstawie:
 
 \begin{itemize}
 
-\item Częstotliwości odtwarzania danego utworu
-\item Częstotliwości występowania zdarzenia \texttt{like}
-\item Częstotliwości występowania zdarzenia \texttt{skip}
+\item częstotliwości odtwarzania danego utworu,
+\item częstotliwości występowania zdarzenia \texttt{like},
+\item częstotliwości występowania zdarzenia \texttt{skip}.
 
 \end{itemize}
 
@@ -153,8 +153,8 @@ Przy okazji prośby o nowe dane, uzgodniono znaczenie atrybutów i ich wartości
 
 \subsection{Druga iteracja zbierania danych}
 \begin{itemize}
-\item Otrzymano szczegółowe informacje, dotyczące znaczenia atrybutów utworów z pliku \texttt{tracks.jsonl},
-\item Klienty wyeliminował braki oraz błędy wymienione w poprzedniej iteracji danych,
+\item Otrzymano szczegółowe informacje dotyczące znaczenia atrybutów utworów z pliku \texttt{tracks.jsonl},
+\item Klient wyeliminował braki oraz błędy wymienione w poprzedniej iteracji danych,
 \item Został dostrzeżony fakt, że w pliku \texttt{tracks.jsonl} niektóre utwory występują kilkukrotnie, a owe wystąpienia różnią się jedynie wartościami \texttt{id} i \texttt{popularity} - zwrócono na to uwagę Klientowi.
 
 \end{itemize}
@@ -163,8 +163,8 @@ Na tym etapie podjęto decyzję o skorzystaniu z podejścia collaborative filter
 
 \subsection{Trzecia iteracja zbierania danych}
 \begin{itemize}
-\item Wyjaśniono wielokrotne wystąpienia tego samego utworu w pliku \texttt{tracks.jsonl} - kilkukrotne wystąpienie tego samego utworu pod innym \texttt{id} i \texttt{popularity} nie jest błędem, a wynika z kilkukrotnego pojawienia się utworu na runku w różnych wydaniach,
-\item Uzyskano większą ilość danych na temat użytkowników oraz ich historii sesji - wstępnie uznano ją za wystarczającą
+\item Wyjaśniono wielokrotne wystąpienia tego samego utworu w pliku \texttt{tracks.jsonl} - kilkukrotne wystąpienie tego samego utworu pod innym \texttt{id} i \texttt{popularity} nie jest błędem, a wynika z kilkukrotnego pojawienia się utworu na rynku w różnych wydaniach,
+\item Uzyskano większą ilość danych na temat użytkowników oraz ich historii sesji - wstępnie uznano ją za wystarczającą.
 \end{itemize}
 
 \end{document}

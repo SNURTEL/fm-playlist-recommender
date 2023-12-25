@@ -17,6 +17,7 @@ pyarrow = "^14.0.1"
 fitter = "^1.6.0"
 wheel = "^0.42.0"
 setuptools = "^69.0.2"
+lightfm = "^1.17"
 
 
 [build-system]
