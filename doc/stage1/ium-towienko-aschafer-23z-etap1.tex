@@ -119,6 +119,8 @@ Wyznaczanie rekomendacji dla pojedynczego użytkownika - pole pod krzywą ROC p
 
 Wyznaczanie rekomendacji dla wielu ($n$) użytkowników - co najmniej $50\%$ rekomendacji uwzględnionych w playliście wyznaczonych z pewnością $0.5^n$ przy w pełni losowym wyborze użytkowników.
 
+Porównanie modelu docelowego z modelem bazowym (który to będzie polegał na wyborze losowych utworów z hisotrii poszczególnych użytkowników biorących udział w tworzeniu playlisty) - w modelu docelowym nastąpi lepsza klasteryzacja, to znaczy mniejsza średnia odległość utworu od środka klastra w przestrzeni embeddingów LightFMa.
+
 \section{Analiza dostarczonych danych}
 
 
@@ -168,3 +170,4 @@ Na tym etapie podjęto decyzję o skorzystaniu z podejścia collaborative filter
 \end{itemize}
 
 \end{document}
+
