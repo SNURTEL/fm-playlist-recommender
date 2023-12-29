@@ -113,13 +113,17 @@ Podejście \textit{collaborative filtering} pozwala na generowanie rekomendacji 
 
 Istotnym problemem w rozważanym zadaniu jest tzw. \textit{cold-start}, czyli zachowanie modelu dla użytkowników bądź utworów, na których model nie był trenowany. Tradycyjne podejścia rozkładu macierzy interakcji takie jak \textit{Funk MF} czy \textit{SVD++} nie przewidują występowania takich sytuacji i spisują się słabo w scenariuszach \textit{cold-start}. W rozwiązaniu zostanie wykorzystany model \href{https://arxiv.org/pdf/1507.08439.pdf}{LightFM}, który rozwiązuje problem \textit{cold-start} przez zastosowanie metadanych (atrybutów) do opisywania zarówno użytkowników, jak i utworów. Przykładowo, nowy utwór dodany do systemu nie był brany pod uwagę przy trenowaniu modelu, ale posiada on atrybuty takie jak \texttt{instrumentalness}, \texttt{tempo}, \texttt{danceability} (zgodne z taksonomią Spotify), oraz wiele innych, co można wykorzystać do wyszukiwania podobieństw. 
 
+\subsection*{Model bazowy}
+
+Model bazowy zostanie zaimplementowany jako prosty algorytm losujący utwory z historii odtwarzania poszczególnych użytkowników biorących udział w tworzeniu playlisty. Jest to podejście referencyjne, które posłuży do porównania z modelem docelowym.
+
 \subsection*{Analityczne kryterium sukcesu}
 
 Wyznaczanie rekomendacji dla pojedynczego użytkownika - pole pod krzywą ROC powyżej $0,6$ przy szacowaniu oceny dla utworów ze zbioru testowego (kryterium bezpośrednio związane z modelem)
 
 Wyznaczanie rekomendacji dla wielu ($n$) użytkowników - co najmniej $50\%$ rekomendacji uwzględnionych w playliście wyznaczonych z pewnością $0.5^n$ przy w pełni losowym wyborze użytkowników.
 
-Porównanie modelu docelowego z modelem bazowym (który to będzie polegał na wyborze losowych utworów z hisotrii poszczególnych użytkowników biorących udział w tworzeniu playlisty) - w modelu docelowym nastąpi lepsza klasteryzacja, to znaczy mniejsza średnia odległość utworu od środka klastra w przestrzeni embeddingów LightFMa.
+Porównanie modelu docelowego z modelem bazowym - w modelu docelowym powinna nastąpić lepsza klasteryzacja, czyli średnia odległość utworów od środka klastra w przestrzeni embeddingów LightFM powinna być mniejsza niż dla modelu bazowego.
 
 \section{Analiza dostarczonych danych}
 
