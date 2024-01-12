@@ -1,6 +1,6 @@
 FROM python:3.11.6-slim-bullseye
 
-ARG DATA_TAG=v4
+ARG DATA_TAG=v3
 
 RUN apt-get update
 RUN apt-get install -y default-jre
@@ -20,6 +20,10 @@ COPY ./src /app/src
 RUN mkdir /data
 VOLUME ["/data"]
 COPY ./data/${DATA_TAG} /data/${DATA_TAG}
+
+
+RUN mkdir /predictions
+VOLUME ["/predictions"]
 
 # copy individual files
 #COPY ./data/${DATA_TAG}/tracks.jsonl /data/${DATA_TAG}/tracks.jsonl
