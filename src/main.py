@@ -11,7 +11,7 @@ from src.spark.create_session import create_session
 
 app = FastAPI()
 
-VIEWS = views("v3")
+VIEWS = views("v4")
 spark = create_session()
 
 for view, file in VIEWS.items():
