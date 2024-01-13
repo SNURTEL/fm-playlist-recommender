@@ -1,8 +1,15 @@
-from fastapi import FastAPI, responses, Query
-from src.functions import get_time_str, create_users_list_for_playlist, base_model_prediction, advanced_model_prediction, choose_model_and_predict, parse_data, save_to_jsonl
+from datetime import datetime
+
+from fastapi import FastAPI, responses, HTTPException
+
+from src.logging import get_logger
+from src.schemas import PredictRequestSchema, PredictionListEntrySchema
+from src.util import generate_recommendation_base, dump_results, PredictionHistoryRecord, \
+    generate_recommendation_advanced, choose_model
 
 app = FastAPI()
 
+logger = get_logger()
 
 @app.get("/", response_class=responses.PlainTextResponse)
 def root():
@@ -10,44 +17,86 @@ def root():
 By Tomasz Owienko and Anna Schäfer
 
 Example:
-http://0.0.0.0:8000/predict/1?playlist_length=10&other_users=2,3,4
+http://0.0.0.0:8081/predict/1?playlist_length=10&other_users=2,3,4
 For base model:
-http://0.0.0.0:8000/predict/base_model/1?playlist_length=10&other_users=2,3,4
+http://0.0.0.0:8081/predict/base_model/1?playlist_length=10&other_users=2,3,4
 For advanced model:
-http://0.0.0.0:8000/predict/advanced_model/1?playlist_length=10&other_users=2,3,4
+http://0.0.0.0:8081/predict/advanced_model/1?playlist_length=10&other_users=2,3,4
 
 You can also use swagger under:
-http://0.0.0.0:8000/docs#/
+http://0.0.0.0:8081/docs#/
 
 Results are saved in predictions.jsonl
 """
 
 
-@app.get("/predict/{user_id}")
-def read_item(user_id: int, playlist_length: int, other_users: str = None):
-    current_time = get_time_str()
-    users = create_users_list_for_playlist(user_id, other_users)
-    playlist, elapsed_time, chosen_model = choose_model_and_predict(users, playlist_length)
-    result = parse_data(user_id, users, playlist, current_time, elapsed_time, chosen_model, True)
-    save_to_jsonl(result)
-    return result
+@app.post("/predict")
+def predict_ab(prs: PredictRequestSchema) -> list[PredictionListEntrySchema]:
+    if choose_model(prs.user_id) == 'base':
+        res, t = generate_recommendation_base(prs.users, prs.playlist_length)
+        logger.debug(f"Model [BASE]/advanced\t{prs.playlist_length} songs")
+    elif choose_model(prs.user_id) == 'advanced':
+        res, t = generate_recommendation_advanced(prs.users, prs.playlist_length)
+        logger.debug(f"Model base/[ADVANCED]\t{prs.playlist_length} songs")
+    else:
+        raise HTTPException(500)
+
+    json: PredictionHistoryRecord = {
+        'user_id': prs.user_id,
+        'other_users': prs.other_users,
+        'playlist': res.index.values.tolist(),
+        'timestamp': datetime.now(),
+        'elapsed_time': t,
+        'model': 'base',
+        'is_ab': False
+    }
+
+    dump_results(json)
+
+    return [
+        PredictionListEntrySchema(id=track_id, name=name, artist=artist) for track_id, (name, artist) in res.iterrows()
+    ]
 
 
-@app.get("/predict/base_model/{user_id}")
-def read_item(user_id: int, playlist_length: int, other_users: str = None):
-    current_time = get_time_str()
-    users = create_users_list_for_playlist(user_id, other_users)
-    playlist, elapsed_time = base_model_prediction(users, playlist_length)
-    result = parse_data(user_id, users, playlist, current_time, elapsed_time, 'base', False)
-    save_to_jsonl(result)
-    return result
+@app.post("/predict/base")
+def predict_base(prs: PredictRequestSchema) -> list[PredictionListEntrySchema]:
+    res, t = generate_recommendation_base(prs.users, prs.playlist_length)
+    logger.debug(f"Model BASE\t{prs.playlist_length} songs")
+
+    json: PredictionHistoryRecord = {
+        'user_id': prs.user_id,
+        'other_users': prs.other_users,
+        'playlist': res.index.values.tolist(),
+        'timestamp': datetime.now(),
+        'elapsed_time': t,
+        'model': 'base',
+        'is_ab': False
+    }
+
+    dump_results(json)
+
+    return [
+        PredictionListEntrySchema(id=track_id, name=name, artist=artist) for track_id, (name, artist) in res.iterrows()
+    ]
 
 
-@app.get("/predict/advanced_model/{user_id}")
-def read_item(user_id: int, playlist_length: int, other_users: str = None):
-    current_time = get_time_str()
-    users = create_users_list_for_playlist(user_id, other_users)
-    playlist, elapsed_time = advanced_model_prediction(users, playlist_length)
-    result = parse_data(user_id, users, playlist, current_time, elapsed_time, 'advanced', False)
-    save_to_jsonl(result)
-    return result
+@app.post("/predict/advanced")
+def predict_advanced(prs: PredictRequestSchema) -> list[PredictionListEntrySchema]:
+    res, t = generate_recommendation_advanced(prs.users, prs.playlist_length)
+    logger.debug(f"Model ADVANCED\t{prs.playlist_length} songs")
+
+    json: PredictionHistoryRecord = {
+        'user_id': prs.user_id,
+        'other_users': prs.other_users,
+        'playlist': res.index.values.tolist(),
+        'timestamp': datetime.now(),
+        'elapsed_time': t,
+        'model': 'base',
+        'is_ab': False
+    }
+
+    dump_results(json)
+
+    return [
+        PredictionListEntrySchema(id=track_id, name=name, artist=artist) for track_id, (name, artist) in res.iterrows()
+    ]
