@@ -99,7 +99,7 @@ Celem projektu jest realizacja funkcjonalności pozwalającej użytkownikom serw
 
 \section{Zadanie modelowania}
 	
-Projekt zakłada zamodelowanie problemu jako zadanie generowania rekomendacji. Planowane jest zastosowanie podejścia \textit{collaborative filtering}, które (w kontekście zadania) opiera się na wyszukiwaniu użytkowników podobnych do rozpatrywanych i generowania rekomendacji w oparciu o ich historie sesji. Do realizacji podejścia \textit{collaborative filtering} zastosowana zostanie technika rozkładu macierzy interakcji między użytkownikami, a utworami. Przewidziane jest porównanie jakości modelu korzystającego z macierzy \textit{feedbacku niejawnego} (użytkownik $X$ odtworzył utwór $Y$), oraz \textit{feedbacku jawnego} (użytkownik $X$ wystawił utworowi $Y$ ocenę $Z$).
+Projekt zakłada zamodelowanie problemu jako zadanie generowania rekomendacji dla zadanej grupy użytkowników (wejście modelu - ich identyfikatory).  Planowane jest zastosowanie podejścia \textit{collaborative filtering}, które (w kontekście zadania) opiera się na wyszukiwaniu użytkowników podobnych do rozpatrywanych i generowania rekomendacji w oparciu o ich historie sesji. Do realizacji podejścia \textit{collaborative filtering} zastosowana zostanie technika rozkładu macierzy interakcji między użytkownikami, a utworami. Przewidziane jest porównanie jakości modelu korzystającego z macierzy \textit{feedbacku niejawnego} (użytkownik $X$ odtworzył utwór $Y$), oraz \textit{feedbacku jawnego} (użytkownik $X$ wystawił utworowi $Y$ ocenę $Z$).
 
 Podejście \textit{collaborative filtering} pozwala na generowanie rekomendacji dla pojedynczego użytkownika. Aby dostosować je do problemu, generowanie rekomendacji dla wielu użytkowników jednocześnie zamodelowane będzie jako:
 \begin{enumerate}
@@ -121,9 +121,7 @@ Model bazowy zostanie zaimplementowany jako prosty algorytm losujący utwory z h
 
 Wyznaczanie rekomendacji dla pojedynczego użytkownika - pole pod krzywą ROC powyżej $0,6$ przy szacowaniu oceny dla utworów ze zbioru testowego (kryterium bezpośrednio związane z modelem)
 
-Wyznaczanie rekomendacji dla wielu ($n$) użytkowników - co najmniej $50\%$ rekomendacji uwzględnionych w playliście wyznaczonych z pewnością $0.5^n$ przy w pełni losowym wyborze użytkowników.
-
-Porównanie modelu docelowego z modelem bazowym - w modelu docelowym powinna nastąpić lepsza klasteryzacja, czyli średnia odległość utworów od środka klastra w przestrzeni embeddingów LightFM powinna być mniejsza niż dla modelu bazowego.
+Wyznaczanie rekomendacji dla wielu ($n$) użytkowników - model lepszy niż model bazowy. Jakość wyników mierzona będzie jako stopień klasteryzacji reprezentacji utworów wchodzących w skład playlisty. Stopień klasteryzacji określony będzie jako średnia odległość reprezentacji utworów od środka klastra w przestrzeni embeddingów modelu LightFM - jest ona generowana podczas trenowania modelu. Rekomendacje lepszego modelu powinny cechować się lepszą klasteryzacją, zatem średnia odległość powinna być niższa. Stopień klasteryzacji można potraktować jako minimalizowaną zmienną celu.
 
 \section{Analiza dostarczonych danych}
 
@@ -140,6 +138,18 @@ Z perspektywy wytestowania podejścia opartego na \textit{jawnym feedbacku} nale
 \item częstotliwości odtwarzania danego utworu,
 \item częstotliwości występowania zdarzenia \texttt{like},
 \item częstotliwości występowania zdarzenia \texttt{skip}.
+
+\end{itemize}
+
+Wstępnie uznano, że do realizacji zadania będą istotne przede wszystkim dane o użytkownikach portalu, ich historiach sesji, oraz utworach - pliki \texttt{users.jsonl}, \texttt{sessions.jsonl}, oraz \texttt{tracks.jsonl}:
+
+\begin{itemize}
+\item \texttt{users.jsonl}
+    \subitem Zdecydowano się na wykorzystanie jedynie informacji o \texttt{id} użytkownika oraz (w przypadku problemów z obsługą scenariusza \textit{cold start}) - deklarowanych preferencjach muzycznych.
+\item \texttt{sessions.jsonl}
+    \subitem Nie odrzucono wstępnie żadnych atrybutów.
+\item \texttt{tracks.jsonl}
+    \subitem Odrzucono (na potrzeby modelowania) jedynie atrybut \texttt{name} - ponieważ pozostałe atrybuty nie są wykorzystywane w sposób bezpośredni, a jedynie służą do wygenerowania reprezentacji utworu w przestrzeni embeddingów, zdecydowano się nie odrzucać wstępnie żadnego z nich.
 
 \end{itemize}
 
