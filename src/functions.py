@@ -1,15 +1,15 @@
 from typing import List, Sequence
-from model.base_model import BaseModel
+from src.model.base_model import BaseModel
+from src.model.fm_model import FMModel
 import pandas as pd
 import numpy as np
 from scipy import stats
 import time
 import json
-from spark.config import views
-from spark.create_session import create_session
+from src.spark.config import views
+from src.spark.create_session import create_session
 
-
-VIEWS = views("v4")
+VIEWS = views("v3")
 spark = create_session()
 
 for view, file in VIEWS.items():
@@ -19,7 +19,8 @@ for view, file in VIEWS.items():
 _tracks = spark.sql(
     f"SELECT DISTINCT id, id_artist, acousticness, danceability, duration_ms, energy, instrumentalness, key, liveness, loudness, popularity, EXTRACT(year from `release_date`) as release_year, speechiness, tempo, valence FROM tracks ").toPandas()
 users = spark.sql(f"SELECT user_id FROM users").toPandas()
-tracks = pd.concat([_tracks[['id', 'id_artist']], _tracks.drop(['id', 'id_artist'], axis=1).apply(stats.zscore)], axis=1)
+tracks = pd.concat([_tracks[['id', 'id_artist']], _tracks.drop(['id', 'id_artist'], axis=1).apply(stats.zscore)],
+                   axis=1)
 sessions = spark.sql(
     """
     SELECT s.user_id, s.track_id, s.weight, acousticness, danceability, duration_ms, energy, instrumentalness, key, liveness, loudness, popularity, EXTRACT(year from `release_date`) as release_year, speechiness, tempo, valence
@@ -84,7 +85,8 @@ def choose_model_and_predict(users: List, playlist_length: int):
     return playlist, elapsed_time, chosen_model
 
 
-def parse_data(user_id: int, users_id: List, playlist_series, timestamp, elapsed_time, model_type: str, is_random: bool):
+def parse_data(user_id: int, users_id: List, playlist_series, timestamp, elapsed_time, model_type: str,
+               is_random: bool):
     # playlist_series is pd.Series
     if len(users_id) == 1:
         other_users = None
@@ -105,7 +107,7 @@ def parse_data(user_id: int, users_id: List, playlist_series, timestamp, elapsed
 
 def save_to_jsonl(data):
     json_object = json.dumps(data)
- 
-    with open("predictions.jsonl", "a") as file_handle:
+
+    with open("/predictions/predictions.jsonl", "a") as file_handle:
         file_handle.write(json_object)
         file_handle.write('\n')

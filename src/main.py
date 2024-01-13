@@ -1,5 +1,5 @@
 from fastapi import FastAPI, responses, Query
-from functions import get_time_str, create_users_list_for_playlist, base_model_prediction, advanced_model_prediction, choose_model_and_predict, parse_data, save_to_jsonl
+from src.functions import get_time_str, create_users_list_for_playlist, base_model_prediction, advanced_model_prediction, choose_model_and_predict, parse_data, save_to_jsonl
 
 app = FastAPI()
 
@@ -10,17 +10,20 @@ def root():
 By Tomasz Owienko and Anna Schäfer
 
 Example:
-http://127.0.0.1:8000/predict/1?playlist_length=10&other_users=2,3,4
+http://0.0.0.0:8000/predict/1?playlist_length=10&other_users=2,3,4
 For base model:
-http://127.0.0.1:8000/predict/base_model/1?playlist_length=10&other_users=2,3,4
+http://0.0.0.0:8000/predict/base_model/1?playlist_length=10&other_users=2,3,4
 For advanced model:
-http://127.0.0.1:8000/predict/advanced_model/1?playlist_length=10&other_users=2,3,4
+http://0.0.0.0:8000/predict/advanced_model/1?playlist_length=10&other_users=2,3,4
+
+You can also use swagger under:
+http://0.0.0.0:8000/docs#/
 
 Results are saved in predictions.jsonl
 """
 
 
-@app.get("predict/{user_id}")
+@app.get("/predict/{user_id}")
 def read_item(user_id: int, playlist_length: int, other_users: str = None):
     current_time = get_time_str()
     users = create_users_list_for_playlist(user_id, other_users)
@@ -30,7 +33,7 @@ def read_item(user_id: int, playlist_length: int, other_users: str = None):
     return result
 
 
-@app.get("predict/base_model/{user_id}")
+@app.get("/predict/base_model/{user_id}")
 def read_item(user_id: int, playlist_length: int, other_users: str = None):
     current_time = get_time_str()
     users = create_users_list_for_playlist(user_id, other_users)
@@ -40,7 +43,7 @@ def read_item(user_id: int, playlist_length: int, other_users: str = None):
     return result
 
 
-@app.get("predict/advanced_model/{user_id}")
+@app.get("/predict/advanced_model/{user_id}")
 def read_item(user_id: int, playlist_length: int, other_users: str = None):
     current_time = get_time_str()
     users = create_users_list_for_playlist(user_id, other_users)
