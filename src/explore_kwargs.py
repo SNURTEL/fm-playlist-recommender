@@ -125,7 +125,7 @@ def main():
             "item_alpha": 10 ** np.random.uniform(low=-6, high=-1),
             "user_alpha": 10 ** np.random.uniform(low=-6, high=-1),
             "no_components": np.random.randint(low=5, high=80),
-            "epochs": 1,
+            "epochs": 10,
         }
 
         print(f"[{i}] train with {training_kwargs}")
