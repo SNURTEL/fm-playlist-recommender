@@ -10,9 +10,30 @@ Recommender system for generating music playlists for fictional "Pozytywka" serv
 
 Check out the [example notebook](src/example.ipynb).
 
-### Project structure
+## Project structure
 - `data` - subsequent data versions for training the model and building the service
 - `doc` - project documentation
+
+---
+
+### Setup 
+```shell
+cd src
+poetry shell
+pip install lightfm==1.17 --no-use-pep517
+poetry install
+```
+
+Note - you may need to manually copy data to `data/v4`.
+
+### Train the model
+```shell
+cd src
+python3 create_models.py
+```
+
+This will train the model and serialize both based and _advanced_ model.
+Adjust params in code.
 
 ### Run the service
 

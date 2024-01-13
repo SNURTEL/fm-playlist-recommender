@@ -543,3 +543,4 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 predictions.jsonl
+src/*training_log.tsv
