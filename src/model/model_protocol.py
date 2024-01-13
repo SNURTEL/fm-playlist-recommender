@@ -3,7 +3,7 @@ from typing import Protocol, Sequence
 import pandas as pd
 
 
-class Recommender(Protocol):
+class ModelProtocol(Protocol):
     def predict_single(self, user: int, number: int) -> pd.Series:
         """
         Recommends `number` of tracks to user of ID `user`.

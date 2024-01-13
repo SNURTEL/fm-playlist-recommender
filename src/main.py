@@ -2,41 +2,40 @@ from datetime import datetime
 
 from fastapi import FastAPI, responses, HTTPException
 
-from src.logging import get_logger
+from src.logger import get_logger
 from src.schemas import PredictRequestSchema, PredictionListEntrySchema
-from src.util import generate_recommendation_base, dump_results, PredictionHistoryRecord, \
-    generate_recommendation_advanced, choose_model
+from src.util import dump_results, PredictionHistoryRecord, choose_model, setup_recommender
+
+DATA_VERSION = "v4"
 
 app = FastAPI()
 
 logger = get_logger()
 
+recommender = setup_recommender(data_version="v4")
+
+
 @app.get("/", response_class=responses.PlainTextResponse)
 def root():
-    return """IUM Task 3 Variant 2
-By Tomasz Owienko and Anna Schäfer
-
-Example:
-http://0.0.0.0:8081/predict/1?playlist_length=10&other_users=2,3,4
-For base model:
-http://0.0.0.0:8081/predict/base_model/1?playlist_length=10&other_users=2,3,4
-For advanced model:
-http://0.0.0.0:8081/predict/advanced_model/1?playlist_length=10&other_users=2,3,4
-
-You can also use swagger under:
-http://0.0.0.0:8081/docs#/
-
-Results are saved in predictions.jsonl
-"""
+    """
+    Get project description
+    """
+    with open("README.md") as fp:
+        return fp.read()
 
 
 @app.post("/predict")
 def predict_ab(prs: PredictRequestSchema) -> list[PredictionListEntrySchema]:
-    if choose_model(prs.user_id) == 'base':
-        res, t = generate_recommendation_base(prs.users, prs.playlist_length)
+    """
+    Make recommendations using either base or advanced model, depending on supplied user ID.
+    """
+    picked_model = choose_model(prs.user_id)
+
+    if picked_model == 'base':
+        res, t = recommender.generate_recommendation_base(prs.users, prs.playlist_length)
         logger.debug(f"Model [BASE]/advanced\t{prs.playlist_length} songs")
-    elif choose_model(prs.user_id) == 'advanced':
-        res, t = generate_recommendation_advanced(prs.users, prs.playlist_length)
+    elif picked_model == 'advanced':
+        res, t = recommender.generate_recommendation_advanced(prs.users, prs.playlist_length)
         logger.debug(f"Model base/[ADVANCED]\t{prs.playlist_length} songs")
     else:
         raise HTTPException(500)
@@ -47,8 +46,8 @@ def predict_ab(prs: PredictRequestSchema) -> list[PredictionListEntrySchema]:
         'playlist': res.index.values.tolist(),
         'timestamp': datetime.now(),
         'elapsed_time': t,
-        'model': 'base',
-        'is_ab': False
+        'model': picked_model,
+        'is_ab': True
     }
 
     dump_results(json)
@@ -60,7 +59,10 @@ def predict_ab(prs: PredictRequestSchema) -> list[PredictionListEntrySchema]:
 
 @app.post("/predict/base")
 def predict_base(prs: PredictRequestSchema) -> list[PredictionListEntrySchema]:
-    res, t = generate_recommendation_base(prs.users, prs.playlist_length)
+    """
+    Make recommendations using the base model.
+    """
+    res, t = recommender.generate_recommendation_base(prs.users, prs.playlist_length)
     logger.debug(f"Model BASE\t{prs.playlist_length} songs")
 
     json: PredictionHistoryRecord = {
@@ -82,7 +84,10 @@ def predict_base(prs: PredictRequestSchema) -> list[PredictionListEntrySchema]:
 
 @app.post("/predict/advanced")
 def predict_advanced(prs: PredictRequestSchema) -> list[PredictionListEntrySchema]:
-    res, t = generate_recommendation_advanced(prs.users, prs.playlist_length)
+    """
+    Make recommendations using the advanced model.
+    """
+    res, t = recommender.generate_recommendation_advanced(prs.users, prs.playlist_length)
     logger.debug(f"Model ADVANCED\t{prs.playlist_length} songs")
 
     json: PredictionHistoryRecord = {

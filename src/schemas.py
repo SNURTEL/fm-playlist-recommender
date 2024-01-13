@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel, field_validator
 
 
@@ -17,7 +15,7 @@ class PredictRequestSchema(BaseModel):
 
     @property
     def users(self):
-        return [self.user_id] + self.other_users
+        return list(set([self.user_id] + self.other_users))
 
 
 class PredictionListEntrySchema(BaseModel):
