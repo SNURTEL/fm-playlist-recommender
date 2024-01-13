@@ -19,7 +19,7 @@ Check out the [example notebook](src/example.ipynb).
 Run with docker:
 ```shell
 docker build -t ium .
-docker run -p 8000:8000 ium
+docker run -p 8081:8081 ium
 ```
 
 **WARNING**: Bear in mind that build context and unused volume may (will) occupy large amounts of space, as docker will need to transfer the entire `data` directory to build daemon and then copy it to volume. A `docker system prune` and `docker volume prune -a` may come in handy if you run out of space.
