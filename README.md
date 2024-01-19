@@ -17,6 +17,9 @@ Check out the [example notebook](src/example.ipynb).
 ---
 
 ### Setup 
+
+To query data with `pyspark`, Java must be installed. `pypark` may not behave correctly with JDK 21 - it is recommended to use JDK 17.
+
 ```shell
 cd src
 poetry shell
