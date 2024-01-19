@@ -7,11 +7,11 @@ from scipy import stats
 from lightfm.data import Dataset
 from lightfm.cross_validation import random_train_test_split
 
-from src.spark.config import views
-from src.spark.create_session import create_session
-from src.training import TrainingKwargs, train_lightfm
-from src.model.base_model import BaseModel
-from src.model.fm_model import FMModel
+from spark.config import views
+from spark.create_session import create_session
+from training import TrainingKwargs, train_lightfm
+from model.base_model import BaseModel
+from model.fm_model import FMModel
 
 """
 Train and serialize both base and advanced models.
