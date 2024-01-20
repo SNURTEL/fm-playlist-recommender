@@ -20,7 +20,7 @@ class Recommender:
 
     def generate_recommendation_advanced(self, user_ids: list[int], playlist_length: int) -> tuple[
         pd.DataFrame, timedelta]:
-        return self._generate_recommendations('base', user_ids, playlist_length)
+        return self._generate_recommendations('advanced', user_ids, playlist_length)
 
     def _generate_recommendations(self, model: model_t, user_ids: list[int], playlist_length: int) -> tuple[
         pd.DataFrame, timedelta]:
@@ -28,7 +28,7 @@ class Recommender:
         if model == 'base':
             ids = self._base_model.predict_multiple(user_ids, playlist_length)
         elif model == 'advanced':
-            ids = self._base_model.predict_multiple(user_ids, playlist_length)
+            ids = self._advanced_model.predict_multiple(user_ids, playlist_length)
         else:
             ids = []
 

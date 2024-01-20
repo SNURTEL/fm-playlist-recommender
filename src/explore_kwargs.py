@@ -103,6 +103,8 @@ def main():
     (interactions, weights) = dataset.build_interactions(d[['user_id', 'track_id']].apply(tuple, axis=1))
     print(f"Interaction matrix: {repr(interactions)}")
 
+    (user_id_mapping, _, item_id_mapping, _) = dataset.mapping()
+
     (train, test) = random_train_test_split(interactions)
 
     feature_names = tracks.drop(['id'], axis=1).columns
@@ -116,7 +118,7 @@ def main():
 
     with open(RESULTS_FILE, mode='w') as fp:
         w = csv.writer(fp, delimiter='\t', lineterminator='\n')
-        w.writerow(EvaluationResults.__annotations__.keys())
+        w.writerow(list(TrainingKwargs.__annotations__.keys()) + list(EvaluationResults.__annotations__.keys()))
 
     i = 1
     while True:
@@ -140,6 +142,7 @@ def main():
             lightfm_model=lightfm_model,
             interactions=interactions,
             item_features=item_features,
+            user_id_mapping=user_id_mapping
         )
 
         base_model = BaseModel(
@@ -195,7 +198,7 @@ def main():
         for _ in range(CLUSTERING_NO_REPS):
             no_users = np.random.randint(low=2, high=10)
             user_ids = users['user_id'].sample(no_users).tolist()
-            r = fm_model.predict_multiple((123, 124, 125, 126, 127, 128), PLAYLIST_LENGTH)
+            r = fm_model.predict_multiple(user_ids, PLAYLIST_LENGTH)
             mean_dists_fm.append(mean_dist_from_cluster_center(r, lightfm_model, item_id_mapping))
 
         mean_dist_fm = sum(mean_dists_fm) / CLUSTERING_NO_REPS
@@ -232,7 +235,7 @@ def main():
 
         with open(RESULTS_FILE, mode='a') as fp:
             w = csv.writer(fp, delimiter='\t', lineterminator='\n')
-            w.writerow(res.values())
+            w.writerow(list(training_kwargs.values()) + list(res.values()))
 
         i += 1
 
