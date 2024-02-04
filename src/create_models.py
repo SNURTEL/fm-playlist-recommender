@@ -21,10 +21,10 @@ Run from `src` directory.
 DATA_VERSION = "v4"
 SERIALIZED_DIR = "serialized"
 TRAIN_KWARGS: TrainingKwargs = {
-    "learning_rate": 0.05,
-    "item_alpha": 1e-6,
+    "learning_rate": 0.034,
+    "item_alpha": 1e-3,
     "user_alpha": 1e-6,
-    "no_components": 30,
+    "no_components": 60,
     "epochs": 10,
 }
 RANDOM_SEED = 12345678
@@ -44,7 +44,7 @@ def main():
         f"SELECT DISTINCT id, id_artist, acousticness, danceability, duration_ms, energy, instrumentalness, key, liveness, loudness, popularity, EXTRACT(year from `release_date`) as release_year, speechiness, tempo, valence FROM tracks ").toPandas()
     tracks = pd.concat([_tracks[['id', 'id_artist']], _tracks.drop(['id', 'id_artist'], axis=1).apply(stats.zscore)],
                        axis=1)
-    users = spark.sql(f"SELECT user_id FROM users").toPandas()
+    users = spark.sql(f"SELECT distinct user_id FROM sessions").toPandas()
 
     d = spark.sql(
         """
@@ -74,8 +74,11 @@ def main():
     num_users, num_items = dataset.interactions_shape()
     print('Num users: {}, num_items {}.'.format(num_users, num_items))
 
+
     (interactions, weights) = dataset.build_interactions(d[['user_id', 'track_id']].apply(tuple, axis=1))
     print(f"Interaction matrix: {repr(interactions)}")
+
+    (user_id_mapping, _, item_id_mapping, _) = dataset.mapping()
 
     (train, test) = random_train_test_split(interactions)
 
@@ -95,6 +98,7 @@ def main():
         lightfm_model=lightfm_model,
         interactions=interactions,
         item_features=item_features,
+        user_id_mapping=user_id_mapping
     )
 
     base_model = BaseModel(

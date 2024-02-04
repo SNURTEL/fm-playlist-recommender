@@ -19,6 +19,7 @@ class FMModel:
                  sessions_df: pd.DataFrame,
                  lightfm_model: LightFM,
                  interactions: csr_array,
+                 user_id_mapping: dict,
                  item_features: Optional[csr_array] = None,
                  user_features: Optional[csr_array] = None):
         self.model = lightfm_model
@@ -29,6 +30,8 @@ class FMModel:
         self.tracks = tracks_df
         self.sessions = sessions_df
 
+        self.user_id_mapping = user_id_mapping
+
     @staticmethod
     def from_serialized(self, j: str) -> FMModel:
         raise NotImplementedError("Deserialization not implemented")
@@ -37,7 +40,13 @@ class FMModel:
         return self._predict_single(user=user, number=number, num_threads=num_threads).reset_index(drop=True)
 
     def _predict_single(self, user: int, number: int, num_threads=4) -> pd.Series:
-        predicted_scores = self.model.predict(user, np.arange(self.interactions.shape[1]),
+        try:
+            internal_id = self.user_id_mapping[user]
+        except KeyError:
+            # fallback to random
+            return self.tracks.sample(number)['id'].reset_index(drop=True)
+
+        predicted_scores = self.model.predict(internal_id, np.arange(self.interactions.shape[1]),
                                               item_features=self.item_features,
                                               num_threads=num_threads)
 

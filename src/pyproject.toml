@@ -20,6 +20,7 @@ setuptools = "^69.0.2"
 lightfm = "^1.17"
 uvicorn = "^0.25.0"
 fastapi = "^0.109.0"
+seaborn = "^0.13.1"
 
 
 [build-system]
